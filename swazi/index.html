@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css" />
+        <link rel="stylesheet" type="text/css" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet-heat.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/OSMBuildings-Leaflet.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="data/json_HealthFacility0.js"></script>
+        <script src="data/json_CondomSites1.js"></script>
+        <script src="data/json_Pubs2.js"></script>
+        <script src="data/json_Groceries3.js"></script>
+        <script src="data/json_ServiceCenters4.js"></script>
+        <script src="data/json_Region5.js"></script>
+        <script src="data/json_DREAMSPriority6.js"></script>
+        <script src="data/json_Inkhundla7.js"></script>
+        <script src="data/json_NumberofOVC8.js"></script>
+        <script src="data/json_NumberOutofSchool9.js"></script>
+        <script src="data/json_PLWHIV10.js"></script>
+        <script>
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:8
+        }).fitBounds([[-27.4040819752,30.0305004539],[-25.6363170273,32.9202262722]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+        var feature_group = new L.featureGroup([]);
+        var bounds_group = new L.featureGroup([]);
+        var raster_group = new L.LayerGroup([]);
+        var basemap0 = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 28
+        });
+        basemap0.addTo(map);
+        function setBounds() {
+        }
+        function geoJson2heat(geojson, weight) {
+          return geojson.features.map(function(feature) {
+            return [
+              feature.geometry.coordinates[1],
+              feature.geometry.coordinates[0],
+              feature.properties[weight]
+            ];
+          });
+        }
+        function pop_HealthFacility0(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['fname'] !== null ? Autolinker.link(String(feature.properties['fname'])) : '') + '</td></tr><tr><td colspan="2">' + (feature.properties['Prevalence'] !== null ? Autolinker.link(String(feature.properties['Prevalence'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleHealthFacility0(feature) {
+        if (feature.properties['q2wHide_prev'] >= 12.8164557 &&
+                feature.properties['q2wHide_prev'] <= 23.69259201) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#ffffb2',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['q2wHide_prev'] >= 23.69259201 &&
+                feature.properties['q2wHide_prev'] <= 30.48892284) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#fdb751',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['q2wHide_prev'] >= 30.48892284 &&
+                feature.properties['q2wHide_prev'] <= 41.46149128) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#f45629',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['q2wHide_prev'] >= 41.46149128 &&
+                feature.properties['q2wHide_prev'] <= 56.01131542) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#bd0026',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        }
+        map.createPane('pane_HealthFacility0');
+        map.getPane('pane_HealthFacility0').style.zIndex = 601;
+        var json_HealthFacility0JSON = new L.geoJson(json_HealthFacility0, {
+            pane: 'pane_HealthFacility0',
+            onEachFeature: pop_HealthFacility0,
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, doStyleHealthFacility0(feature))
+            }
+        });
+        bounds_group.addLayer(json_HealthFacility0JSON);
+        feature_group.addLayer(json_HealthFacility0JSON);
+        function pop_CondomSites1(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Partner</th><td>' + (feature.properties['PARTNER_OW'] !== null ? Autolinker.link(String(feature.properties['PARTNER_OW'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        map.createPane('pane_CondomSites1');
+        map.getPane('pane_CondomSites1').style.zIndex = 602;
+        function doStyleCondomSites1() {
+            return {
+                pane: 'pane_CondomSites1',
+                radius: 3.2,
+                fillColor: '#fb9a99',
+                color: '#fb9a99',
+                weight: 0.0,
+                opacity: 1.0,
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillOpacity: 1.0
+            }
+        }
+        function doPointToLayerCondomSites1(feature, latlng) {
+            return L.circleMarker(latlng, doStyleCondomSites1())
+        }
+        var json_CondomSites1JSON = new L.geoJson(json_CondomSites1, {
+            pane: 'pane_CondomSites1',
+            onEachFeature: pop_CondomSites1,
+            pointToLayer: doPointToLayerCondomSites1
+            });
+        bounds_group.addLayer(json_CondomSites1JSON);
+        feature_group.addLayer(json_CondomSites1JSON);
+        function pop_Pubs2(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Name</th><td>' + (feature.properties['OUTLETNAME'] !== null ? Autolinker.link(String(feature.properties['OUTLETNAME'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        map.createPane('pane_Pubs2');
+        map.getPane('pane_Pubs2').style.zIndex = 603;
+        function doStylePubs2() {
+            return {
+                pane: 'pane_Pubs2',
+                radius: 3.2,
+                fillColor: '#c417e2',
+                color: '#c417e2',
+                weight: 0.0,
+                opacity: 1.0,
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillOpacity: 1.0
+            }
+        }
+        function doPointToLayerPubs2(feature, latlng) {
+            return L.circleMarker(latlng, doStylePubs2())
+        }
+        var json_Pubs2JSON = new L.geoJson(json_Pubs2, {
+            pane: 'pane_Pubs2',
+            onEachFeature: pop_Pubs2,
+            pointToLayer: doPointToLayerPubs2
+            });
+        bounds_group.addLayer(json_Pubs2JSON);
+        feature_group.addLayer(json_Pubs2JSON);
+        function pop_Groceries3(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Name</th><td>' + (feature.properties['OUTLETNAME'] !== null ? Autolinker.link(String(feature.properties['OUTLETNAME'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        map.createPane('pane_Groceries3');
+        map.getPane('pane_Groceries3').style.zIndex = 604;
+        function doStyleGroceries3() {
+            return {
+                pane: 'pane_Groceries3',
+                radius: 3.2,
+                fillColor: '#267300',
+                color: '#267300',
+                weight: 0.0,
+                opacity: 1.0,
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillOpacity: 1.0
+            }
+        }
+        function doPointToLayerGroceries3(feature, latlng) {
+            return L.circleMarker(latlng, doStyleGroceries3())
+        }
+        var json_Groceries3JSON = new L.geoJson(json_Groceries3, {
+            pane: 'pane_Groceries3',
+            onEachFeature: pop_Groceries3,
+            pointToLayer: doPointToLayerGroceries3
+            });
+        bounds_group.addLayer(json_Groceries3JSON);
+        feature_group.addLayer(json_Groceries3JSON);
+        function pop_ServiceCenters4(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Facility</th><td>' + (feature.properties['PMTCT'] !== null ? Autolinker.link(String(feature.properties['PMTCT'])) : '') + '</td></tr><tr><th scope="row">Service Type</th><td>' + (feature.properties['Service'] !== null ? Autolinker.link(String(feature.properties['Service'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleServiceCenters4(feature) {
+			switch (feature.properties['Service']) {
+                case 'PMTCT':
+                    return {
+                    radius: 3.2,
+                    fillColor: '#000000',
+                    color: '#000000',
+                    weight: 0.0,
+                    opacity: 1.0,
+                    dashArray: '',
+                    fillOpacity: '1.0',
+                };
+                break;
+                case 'PMTCT/ART':
+                    return {
+                    radius: 3.2,
+                    fillColor: '#33a02c',
+                    color: '#33a02c',
+                    weight: 0.0,
+                    opacity: 1.0,
+                    dashArray: '',
+                    fillOpacity: '1.0',
+                };
+                break;
+            }
+        }
+        map.createPane('pane_ServiceCenters4');
+        map.getPane('pane_ServiceCenters4').style.zIndex = 605;
+        var json_ServiceCenters4JSON = new L.geoJson(json_ServiceCenters4, {
+            pane: 'pane_ServiceCenters4',
+            onEachFeature: pop_ServiceCenters4,
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, doStyleServiceCenters4(feature))
+            }
+        });
+        bounds_group.addLayer(json_ServiceCenters4JSON);
+        feature_group.addLayer(json_ServiceCenters4JSON);
+        function pop_Region5(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2"><strong>Region</strong><br />' + (feature.properties['REGION_NAM'] !== null ? Autolinker.link(String(feature.properties['REGION_NAM'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleRegion5(feature) {
+            return {
+                weight: 4.24,
+                color: '#000000',
+                fillColor: '#000000',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                opacity: 1.0,
+                fillOpacity: 0.0
+            };
+        }
+        map.createPane('pane_Region5');
+        map.getPane('pane_Region5').style.zIndex = 606;
+        var json_Region5JSON = new L.geoJson(json_Region5, {
+            pane: 'pane_Region5',
+            onEachFeature: pop_Region5,
+            style: doStyleRegion5
+        });
+        bounds_group.addLayer(json_Region5JSON);
+        feature_group.addLayer(json_Region5JSON);
+        function pop_DREAMSPriority6(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2"><strong>INKHUNDLAN</strong><br />' + (feature.properties['INKHUNDLAN'] !== null ? Autolinker.link(String(feature.properties['INKHUNDLAN'])) : '') + '</td></tr><tr><td colspan="2"><strong>Priority</strong><br />' + (feature.properties['Priority'] !== null ? Autolinker.link(String(feature.properties['Priority'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleDREAMSPriority6(feature) {
+			switch (feature.properties['Priority']) {
+                case 'Adolescent Girls':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#f1f47a',
+                    color: '#f1f47a',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case 'Young Women & Men':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#c417e2',
+                    color: '#c417e2',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case 'Adolescent Girls, Young Women & Men':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#da540c',
+                    color: '#da540c',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+            }
+        }
+        map.createPane('pane_DREAMSPriority6');
+        map.getPane('pane_DREAMSPriority6').style.zIndex = 607;
+        var json_DREAMSPriority6JSON = new L.geoJson(json_DREAMSPriority6, {
+            pane: 'pane_DREAMSPriority6',
+            onEachFeature: pop_DREAMSPriority6,
+            style: doStyleDREAMSPriority6
+        });
+        bounds_group.addLayer(json_DREAMSPriority6JSON);
+        feature_group.addLayer(json_DREAMSPriority6JSON);
+        function pop_Inkhundla7(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2"><strong>Inkhundla</strong><br />' + (feature.properties['Inkhundla'] !== null ? Autolinker.link(String(feature.properties['Inkhundla'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleInkhundla7(feature) {
+            return {
+                weight: 1.04,
+                color: '#000000',
+                fillColor: '#000000',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                opacity: 1.0,
+                fillOpacity: 0.0
+            };
+        }
+        map.createPane('pane_Inkhundla7');
+        map.getPane('pane_Inkhundla7').style.zIndex = 608;
+        var json_Inkhundla7JSON = new L.geoJson(json_Inkhundla7, {
+            pane: 'pane_Inkhundla7',
+            onEachFeature: pop_Inkhundla7,
+            style: doStyleInkhundla7
+        });
+        bounds_group.addLayer(json_Inkhundla7JSON);
+        feature_group.addLayer(json_Inkhundla7JSON);
+        function pop_NumberofOVC8(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2"><strong>OVC 0 - 17</strong><br />' + (feature.properties['ovc0_17'] !== null ? Autolinker.link(String(feature.properties['ovc0_17'])) : '') + '</td></tr><tr><td colspan="2"><strong>Inkhundla</strong><br />' + (feature.properties['Inkhundla'] !== null ? Autolinker.link(String(feature.properties['Inkhundla'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleNumberofOVC8(feature) {
+        if (feature.properties['ovc0_17'] >= 1253.0 &&
+                feature.properties['ovc0_17'] <= 2333.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#ffffcc',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['ovc0_17'] >= 2333.0 &&
+                feature.properties['ovc0_17'] <= 3749.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#a9db8e',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['ovc0_17'] >= 3749.0 &&
+                feature.properties['ovc0_17'] <= 5279.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#48ae60',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['ovc0_17'] >= 5279.0 &&
+                feature.properties['ovc0_17'] <= 7429.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#006837',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        }
+        map.createPane('pane_NumberofOVC8');
+        map.getPane('pane_NumberofOVC8').style.zIndex = 609;
+        var json_NumberofOVC8JSON = new L.geoJson(json_NumberofOVC8, {
+            pane: 'pane_NumberofOVC8',
+            onEachFeature: pop_NumberofOVC8,
+            style: doStyleNumberofOVC8
+        });
+        bounds_group.addLayer(json_NumberofOVC8JSON);
+        feature_group.addLayer(json_NumberofOVC8JSON);
+        function pop_NumberOutofSchool9(feature, layer) {
+            var popupContent = '<table><tr><td colspan="2"><strong>Out of School 10 - 19</strong><br />' + (feature.properties['outsch1019'] !== null ? Autolinker.link(String(feature.properties['outsch1019'])) : '') + '</td></tr><tr><td colspan="2"><strong>Inkhundla</strong><br />' + (feature.properties['Inkhundla'] !== null ? Autolinker.link(String(feature.properties['Inkhundla'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleNumberOutofSchool9(feature) {
+        if (feature.properties['outsch1019'] >= 352.0 &&
+                feature.properties['outsch1019'] <= 850.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#edf8fb',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['outsch1019'] >= 850.0 &&
+                feature.properties['outsch1019'] <= 1279.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#98d7cd',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['outsch1019'] >= 1279.0 &&
+                feature.properties['outsch1019'] <= 1693.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#3fac76',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['outsch1019'] >= 1693.0 &&
+                feature.properties['outsch1019'] <= 2352.0) {
+
+            return {
+                color: '#000000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#006d2c',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        }
+        map.createPane('pane_NumberOutofSchool9');
+        map.getPane('pane_NumberOutofSchool9').style.zIndex = 610;
+        var json_NumberOutofSchool9JSON = new L.geoJson(json_NumberOutofSchool9, {
+            pane: 'pane_NumberOutofSchool9',
+            onEachFeature: pop_NumberOutofSchool9,
+            style: doStyleNumberOutofSchool9
+        });
+        bounds_group.addLayer(json_NumberOutofSchool9JSON);
+        feature_group.addLayer(json_NumberOutofSchool9JSON);
+        function pop_PLWHIV10(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">PLWHIV</th><td>' + (feature.properties['plhiv'] !== null ? Autolinker.link(String(feature.properties['plhiv'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStylePLWHIV10(feature) {
+        if (feature.properties['plhiv'] >= 0.0 &&
+                feature.properties['plhiv'] <= 100.0) {
+
+            return {
+                color: '#267300',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#267300',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['plhiv'] >= 100.0 &&
+                feature.properties['plhiv'] <= 500.0) {
+
+            return {
+                color: '#a3c400',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#a3c400',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['plhiv'] >= 500.0 &&
+                feature.properties['plhiv'] <= 1000.0) {
+
+            return {
+                color: '#a83800',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#a83800',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        if (feature.properties['plhiv'] >= 1000.0 &&
+                feature.properties['plhiv'] <= 9317.516134) {
+
+            return {
+                color: '#e60000',
+                weight: '1.04',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillColor: '#e60000',
+                opacity: '1.0',
+                fillOpacity: '1.0',
+            }
+        }
+        }
+        map.createPane('pane_PLWHIV10');
+        map.getPane('pane_PLWHIV10').style.zIndex = 611;
+        var json_PLWHIV10JSON = new L.geoJson(json_PLWHIV10, {
+            pane: 'pane_PLWHIV10',
+            onEachFeature: pop_PLWHIV10,
+            style: doStylePLWHIV10
+        });
+        bounds_group.addLayer(json_PLWHIV10JSON);
+        feature_group.addLayer(json_PLWHIV10JSON);
+        var img_Prevalence11 = 'data/json_Prevalence11.png';
+        var img_bounds_Prevalence11 = [[-27.3623109752,30.7717091966],[-25.6787206483,32.1790175295]];
+        var overlay_Prevalence11 = new L.imageOverlay(img_Prevalence11, img_bounds_Prevalence11);
+        bounds_group.addLayer(overlay_Prevalence11);
+        raster_group.addLayer(overlay_Prevalence11);
+        raster_group.addTo(map);
+        feature_group.addTo(map);
+        var baseMaps = {'OSM': basemap0};
+        L.control.layers(baseMaps,{"Prevalence": overlay_Prevalence11,'PLWHIV<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/PLWHIV10_0100.png" />  0 - 100 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/PLWHIV10_100500.png" />  100 - 500 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/PLWHIV10_5001000.png" />  500 - 1000 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/PLWHIV10_1000.png" /> > 1000<br />': json_PLWHIV10JSON,'Number Out of School<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberOutofSchool9_352850.png" />  352 - 850 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberOutofSchool9_8501279.png" />  850 - 1279 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberOutofSchool9_12791693.png" />  1279 - 1693 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberOutofSchool9_16932352.png" />  1693 - 2352 <br />': json_NumberOutofSchool9JSON,'Number of OVC <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberofOVC8_12532333.png" />  1253 - 2333 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberofOVC8_23333749.png" />  2333 - 3749 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberofOVC8_37495279.png" />  3749 - 5279 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/NumberofOVC8_52797429.png" />  5279 - 7429 <br />': json_NumberofOVC8JSON,'<img src="legend/Inkhundla7.png" /> Inkhundla': json_Inkhundla7JSON,'DREAMS Priority<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/DREAMSPriority6_AdolescentGirls.png" /> Adolescent Girls<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/DREAMSPriority6_YoungWomenMen.png" /> Young Women & Men<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/DREAMSPriority6_AdolescentGirlsYoungWomenMen.png" /> Adolescent Girls, Young Women & Men<br />': json_DREAMSPriority6JSON,'<img src="legend/Region5.png" /> Region': json_Region5JSON,'Service Centers<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/ServiceCenters4_PMTCT.png" /> PMTCT<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/ServiceCenters4_PMTCTART.png" /> PMTCT/ART<br />': json_ServiceCenters4JSON,'<img src="legend/Groceries3.png" /> Groceries': json_Groceries3JSON,'<img src="legend/Pubs2.png" /> Pubs': json_Pubs2JSON,'<img src="legend/CondomSites1.png" /> Condom Sites': json_CondomSites1JSON,'Health Facility<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HealthFacility0_128237.png" />  12.8 - 23.7 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HealthFacility0_237305.png" />  23.7 - 30.5 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HealthFacility0_305415.png" />  30.5 - 41.5 <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HealthFacility0_415560.png" />  41.5 - 56.0 <br />': json_HealthFacility0JSON,},{collapsed:false}).addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>

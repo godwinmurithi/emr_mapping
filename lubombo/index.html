@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css" />
+        <link rel="stylesheet" type="text/css" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/label.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+        <script src="js/leaflet.js"></script>
+        <script src="js/OSMBuildings-Leaflet.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/label.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="data/json_CondomSites0.js"></script>
+        <script src="data/json_HIVPointPrevalence1.js"></script>
+        <script src="data/json_Tinkhundla2.js"></script>
+        <script src="data/json_Region3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:9
+        }).fitBounds([[-27.1961940637,30.7487147243],[-25.9058349063,32.8585440283]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+        var feature_group = new L.featureGroup([]);
+        var bounds_group = new L.featureGroup([]);
+        var raster_group = new L.LayerGroup([]);
+        var basemap0 = L.tileLayer('http://a.tile.stamen.com/terrain/{z}/{x}/{y}.png', {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>,<a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;Map data: &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 28
+        });
+        basemap0.addTo(map);
+        var initialOrder = new Array();
+        var layerOrder = new Array();
+        function stackLayers() {
+            for (index = 0; index < initialOrder.length; index++) {
+                map.removeLayer(initialOrder[index]);
+                map.addLayer(initialOrder[index]);
+            }
+        }
+        function restackLayers() {
+            for (index = 0; index < layerOrder.length; index++) {
+                layerOrder[index].bringToFront();
+            }
+        }
+        layerControl = L.control.layers({},{},{collapsed:false});
+        function pop_CondomSites0(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    layer.setStyle(doStyleCondomSites0(feature));
+
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['PARTNER_OW'] !== null ? Autolinker.link(String(feature.properties['PARTNER_OW'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleCondomSites0() {
+            return {
+                radius: 3.2,
+                fillColor: '#000000',
+                color: '#000000',
+                weight: 0.0,
+                opacity: 1.0,
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                fillOpacity: 1.0
+            }
+        }
+        function doPointToLayerCondomSites0(feature, latlng) {
+            return L.circleMarker(latlng, doStyleCondomSites0())
+        }
+        var json_CondomSites0JSON = new L.geoJson(json_CondomSites0, {
+            onEachFeature: pop_CondomSites0, 
+            pointToLayer: doPointToLayerCondomSites0
+            });
+        layerOrder[layerOrder.length] = json_CondomSites0JSON;
+
+        bounds_group.addLayer(json_CondomSites0JSON);
+        initialOrder[initialOrder.length] = json_CondomSites0JSON;
+        feature_group.addLayer(json_CondomSites0JSON);
+        function pop_HIVPointPrevalence1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    layer.setStyle(doStyleHIVPointPrevalence1(feature));
+
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['prevalence'] !== null ? Autolinker.link(String(feature.properties['prevalence'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleHIVPointPrevalence1(feature) {
+        if (feature.properties['prevalence'] >= 0.25446 &&
+                feature.properties['prevalence'] <= 0.2702152) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#ffffb2',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['prevalence'] >= 0.2702152 &&
+                feature.properties['prevalence'] <= 0.2859704) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#fecc5c',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['prevalence'] >= 0.2859704 &&
+                feature.properties['prevalence'] <= 0.3017256) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#fd8d3c',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['prevalence'] >= 0.3017256 &&
+                feature.properties['prevalence'] <= 0.3174808) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#f03b20',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        if (feature.properties['prevalence'] >= 0.3174808 &&
+                feature.properties['prevalence'] <= 0.333236) {
+
+            return {
+                radius: 4.0,
+                fillColor: '#bd0026',
+                color: '#000000',
+                weight: 0.0,
+                fillOpacity: '1.0',
+                opacity: '1.0',
+                dashArray: ''
+            }
+        }
+
+        }
+        var json_HIVPointPrevalence1JSON = new L.geoJson(json_HIVPointPrevalence1, {
+            onEachFeature: pop_HIVPointPrevalence1,
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, doStyleHIVPointPrevalence1(feature))
+            }
+        });
+        layerOrder[layerOrder.length] = json_HIVPointPrevalence1JSON;
+
+        bounds_group.addLayer(json_HIVPointPrevalence1JSON);
+        initialOrder[initialOrder.length] = json_HIVPointPrevalence1JSON;
+        feature_group.addLayer(json_HIVPointPrevalence1JSON);
+        function pop_Tinkhundla2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    layer.setStyle(doStyleTinkhundla2(feature));
+
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['name'] !== null ? Autolinker.link(String(feature.properties['name'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleTinkhundla2(feature) {
+            return {
+                weight: 0.24,
+                color: '#000000',
+                fillColor: '#000000',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                opacity: 1.0,
+                fillOpacity: 0.0
+            };
+        }
+        var json_Tinkhundla2JSON = new L.geoJson(json_Tinkhundla2, {
+            onEachFeature: pop_Tinkhundla2,
+            style: doStyleTinkhundla2
+        });
+        layerOrder[layerOrder.length] = json_Tinkhundla2JSON;
+        bounds_group.addLayer(json_Tinkhundla2JSON);
+        initialOrder[initialOrder.length] = json_Tinkhundla2JSON;
+        feature_group.addLayer(json_Tinkhundla2JSON);
+        function pop_Region3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    layer.setStyle(doStyleRegion3(feature));
+
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><td colspan="2">' + (feature.properties['REGION_NAM'] !== null ? Autolinker.link(String(feature.properties['REGION_NAM'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleRegion3(feature) {
+            return {
+                weight: 2.64,
+                color: '#000000',
+                fillColor: '#000000',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                opacity: 1.0,
+                fillOpacity: 0.0
+            };
+        }
+        var json_Region3JSON = new L.geoJson(json_Region3, {
+            onEachFeature: pop_Region3,
+            style: doStyleRegion3
+        });
+        layerOrder[layerOrder.length] = json_Region3JSON;
+        bounds_group.addLayer(json_Region3JSON);
+        initialOrder[initialOrder.length] = json_Region3JSON;
+        feature_group.addLayer(json_Region3JSON);
+        var img_HIVHeatmap4 = 'data/json_HIVHeatmap4.png';
+        var img_bounds_HIVHeatmap4 = [[-27.1656408905,31.4748196036],[-25.9367255956,32.132439149]];
+        var overlay_HIVHeatmap4 = new L.imageOverlay(img_HIVHeatmap4, img_bounds_HIVHeatmap4);
+        bounds_group.addLayer(overlay_HIVHeatmap4);
+        layerOrder[layerOrder.length] = overlay_HIVHeatmap4;
+        raster_group.addLayer(overlay_HIVHeatmap4);
+        raster_group.addTo(map);
+        feature_group.addTo(map);
+        var baseMaps = {'Stamen Terrain': basemap0};
+        L.control.layers(baseMaps,{"HIV Heatmap": overlay_HIVHeatmap4,'<img src="legend/Region3.png" /> Region': json_Region3JSON,'<img src="legend/Tinkhundla2.png" /> Tinkhundla': json_Tinkhundla2JSON,'HIV Point Prevalence<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HIVPointPrevalence1_255270.png" />  25.5% - 27.0%<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HIVPointPrevalence1_270286.png" />  27.0% - 28.6%<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HIVPointPrevalence1_286302.png" />  28.6% - 30.2% <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HIVPointPrevalence1_302318.png" />  30.2% - 31.8% <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/HIVPointPrevalence1_0317503332.png" />  0.3175 - 0.3332 <br />': json_HIVPointPrevalence1JSON,'<img src="legend/CondomSites0.png" /> Condom Sites': json_CondomSites0JSON,},{collapsed:false}).addTo(map);
+        stackLayers();
+        map.on('overlayadd', restackLayers);
+        </script>
+    </body>
+</html>

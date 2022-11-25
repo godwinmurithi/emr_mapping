@@ -1,0 +1,183 @@
+<html>
+<head>
+	
+	<title> Siaya County </title>
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css">
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.0/dist/MarkerCluster.css">
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.0/dist/MarkerCluster.Default.css">
+
+	<script type="text/javascript" src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+	<!--<script type="text/javascript" src="https://unpkg.com/leaflet@1.0.2/dist/leafletembed.js"></script>-->
+	<script type="text/javascript" src="https://unpkg.com/leaflet.markercluster@1.0.0/dist/leaflet.markercluster.js"></script>
+	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="constituency.geojson"></script>
+	<script type="text/javascript" src="ward.geojson"></script>
+	<script type="text/javascript" src="pollstation.geojson"></script>
+	<style type="text/css">
+		#map{height: 100%} /*#map{height: 550px; width:500px;} */
+		.info {
+			padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8);box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px;
+		}
+		.info h4 {
+			margin: 0 0 5px; color: #777;
+		}
+		.legend {
+			line-height: 18px;color: #555;
+		}
+		.legend i {
+			width: 18px; height: 18px; float: right;margin-left: 8px;opacity:.7;
+		}
+		.leaflet-popup-content img { 
+			margin: 0 auto; display:block; 
+		}
+		.leaflet-popup-content-wrapper {
+			background:#ed9121;
+			color:#fff;
+			font-size:12px;
+			line-height:15px;
+		}
+	</style>
+
+</head>
+<body>
+	<h2> GUMBO FOR SIAYA 2017! </h2>
+	<div id="map"></div>
+	<script type="text/javascript">
+		
+		// plot the polling centers as a cluster of points: great for faster loading
+		//var polls = L.layerGroup([L.geoJson(poll_centers)]);//if you opt for direct mapping
+		var cluster = L.markerClusterGroup();
+
+		cluster.addLayer(L.geoJson(pollstation, {pointToLayer: function(feature, latlng){
+			var marker = L.marker(latlng, {icon: L.icon({iconUrl:'vote.png', iconSize:[80,80]})}); marker.bindPopup("<b> Poll Center: </b>"+(feature.properties.station) +'<br/>' + "<b> Constituency: </b>"+ feature.properties.const + '<br/><b> Registered Voters: </b> '+ feature.properties.voters_13 + "<p><img src='gumbo.png' alt='Gumbo for Governor' style='float:right;width:50px;height:50px;'/></p>"); return marker;
+		}}));
+		// adding the cluster to layergroup
+		var polls = L.layerGroup([cluster]);
+	  // size the points, I prefer python here i.e. pysal package
+	  function getSize(s){
+	  	if (s > 1828){
+	  		return 15;
+	  	}else if (s > 888){
+	  		return 10;
+	  	}else if (s > 483){
+	  		return 5;
+	  	}else {
+	  		return 2
+	  	}
+	  }
+	  // color the points, define the classes based on natural breaks from qgis plot
+	    function getColors(p){
+	    	return  p > 1828 ? '#a63603':
+	    	    	p > 888  ? '#f16913':
+	    	    	p > 483  ? '#fdae6b':
+	    		               '#fdd0a2';
+	    }
+	    // load the points into layer group		
+		var pollgrad = L.layerGroup([L.geoJson(pollstation, {
+			pointToLayer: function(feature, latlng){
+				return new L.CircleMarker(latlng, {
+					radius: getSize(feature.properties.voters_13), 
+					fillOpacity:1, 
+					color:getColors(feature.properties.voters_13)
+				});
+	  	}, onEachFeature: function(feature, layer){
+	  		layer.bindPopup("<b> Poll Station: </b>"+feature.properties.station+"<br> <b>Registered Voters: </b>"+(feature.properties.voters_13).toLocaleString())
+	  	}
+	  })]);
+		// load constituency file
+		var consts = L.layerGroup([L.geoJson(constituency, {
+			style: {fillColor: "orange", "weight":2, "opacity":0.65, "color":"purple", fillOpacity:0, dashArray:'4'},
+			onEachFeature: function(feature, layer) {
+				layer.bindPopup('<b> Constituency: </b>'+feature.properties.constituency+'<br/> <b>2013 Registered Voters:</b> '+(feature.properties.y2013).toLocaleString()+'<br/> <b>2017 Registered Voters: </b>'+(feature.properties.y2017).toLocaleString())
+			}
+		})]);
+
+	    // Making a Choropleth map, here define the class colors based on natural breaks from qgis plot
+	    function getColor(p){
+	    	return  p > 18612 ? '#d94801':
+	    	    	p > 14568  ? '#fd8d3c':
+	    	    	p > 10811  ? '#fdd0a2':
+	    		                '#fee6ce';
+	    }
+	    // define the styling
+	    function style(feature){
+	    	return {
+	    		fillColor: getColor(feature.properties.voters_17),
+	    		weight:2, opacity:1, color: 'white', dashArray:'5',
+	    		fillOpacity:.9
+	    	};
+	    }
+	    // make wards highlighted visually, define event listener
+	    function highlightFeature(e) {
+	    	var layer = e.target;
+	    	layer.setStyle({
+	    		weight:5, color:'orange', dashArray:'', fillOpacity:.7
+	    	});//not all browsers support bring to front on highllight
+	    	if (!L.Browser.ie && !L.Browser.opera & !L.Browser.edge){
+	    		layer.bringToFront();
+	    	}
+	    	info.update(layer.feature.properties);
+	    }
+	    // define what happens on mouse out
+	    function resetHighlight(e) {
+	    	wardx.resetStyle(e.target);
+	    	info.update();
+	    }
+	    // zoom to feature on click, define a click listener
+	    function zoomToFeature(e) {
+	    	map.fitBounds(e.target.getBounds());
+	    }
+	    // now add the listerners (click, hover) to our ward feature
+	    function onEachFeature (feature, layer) {
+	    	layer.on({
+	    		mouseover: highlightFeature,
+	    		mouseout: resetHighlight,
+	    		click: zoomToFeature
+	    	});
+	    }
+	    // plot the wards files based on our styling
+	    var wardx = L.geoJson(ward, {
+	    	style: style, onEachFeature: onEachFeature
+	    });
+		// add the wards to layer	    
+		var wards = L.layerGroup([wardx]);
+
+		var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+		{
+			maxZoom:15, minZoom:8, attribution:'Map by &copy; <a href="http://www.mapnovate.com">bmitto</a>'
+		});
+		// define a map container
+		var map = L.map('map',{center:[-0.0175, 34.248], zoom:3, layers:[tiles, polls, wards]});
+		map.fitBounds(wardx.getBounds());
+		// define layers and add them to layer control
+		var baseMap = {"Streets": tiles};
+		var overLays = {"Poll Center (Cluster)": polls, "Poll Center (By Voters)": pollgrad, "Constituency": consts,"Wards": wards};
+	    L.control.layers(baseMap, overLays).addTo(map);
+
+	    // style the map to return properties of highlighted feature
+	    var info = L.control();
+	    info.onAdd = function (map) {
+	    	this._div = L.DomUtil.create('div', 'info');
+	    	this.update();
+	    	return this._div;
+	    };
+	    // pass feature property
+	    info.update = function(props){
+	    	this._div.innerHTML = '<h4> Voters per Ward</h4>'+ (props ? '<b>' + props.ward +'</b><br />' + '<b>'+(props.voters_17).toLocaleString()+'</b>':'Hover over a ward');
+	    };
+	    info.addTo(map); 
+	    // addig legend to map
+	    var legend = L.control({position: 'bottomleft'});
+	    legend.onAdd = function (map) {
+	    	var div = L.DomUtil.create('div', 'info legend'),
+	    	grades = [7076, 10811, 14568, 18612], labels = [];
+	    	for (var i=0; i < grades.length; i++){
+	    		div.innerHTML += '<i style="background:'+getColor(grades[i]+1)+'"></i>'+ (grades[i]).toLocaleString()+(grades[i+1]?' &ndash; '+'&lt; '+ (grades[i+1]).toLocaleString()+'<br>':'- 24,259');
+	    	}
+	    	return div;
+	    };	   
+		legend.addTo(map);
+		
+	</script>
+</body>
+</html>	
