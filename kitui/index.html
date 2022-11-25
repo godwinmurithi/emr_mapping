@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kitui - Wards</title>
+    <meta charset="utf-8" , name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css">
+    <script type="text/javascript" src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+    <!--<script type="text/javascript" src = "data/jquery-3.3.1.min.js"></script>-->
+    <!--<script src="data/Leaflet.CountrySelect.js"></script>-->
+    <style type="text/css">
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            width: 600px;
+            height: 600px;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <!--<script type="text/javascript" src = "data/wards.geojson"></script>-->
+    <script type="text/javascript" src="data/kitui_ward.geojson"></script>
+    <script type="text/javascript">
+        var map = L.map('map', { scrollWheelZoom: false }).setView([-1.388, 38.435], 8);
+        var OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 15, minZoom: 8,
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>'
+        });
+
+        var MBox = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYm1pdHRvIiwiYSI6ImNqZHgzdWFtZTBmejUzM3AwaG1rZjRyMTMifQ.rwT5EXzQkDsAuX0_1EWYvg', {
+            id: 'mapbox.light',
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>'
+        });
+
+        var CartoDB = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        function highlightFeature(e) {
+            var layer = e.target;
+            layer.setStyle({
+                weight: 5, color: 'maroon', dashArray: '', fillOpacity: .5
+            });
+            if (!L.Browser.ie && !L.Browser.opera & !L.Browser.edge) {
+                layer.bringToFront();
+            }
+            info.update(layer.feature.properties);
+        }
+
+
+        var ward = L.geoJson(wards, {
+            style: function (feature) {
+                return { fillColor: 'grey', weight: 1, opacity: 1, color: 'white', dashArray: '5', fillOpacity: .5 }; //#00CD66, #CD2990
+            }, onEachFeature: function (feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: function (e) { ward.resetStyle(e.target); info.update(); },
+                    click: function (e) { map.fitBounds(e.target.getBounds()); }
+                });
+            }
+        }).addTo(map);
+
+
+        L.control.layers({ "Open Street Map": OSM, "Mapbox Light": MBox, "Carto DB": CartoDB }, { "Wards": ward }).addTo(map);
+
+        var info = L.control({ position: 'topleft' });
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div
+        };
+        info.update = function (props) {
+            this._div.innerHTML = '<h4> Administrative Units </h4>' + (props ? '<b>Sub County: ' +
+                (props.constituen).toUpperCase() + '</b>' + '<br/><b>Ward: ' + (props.ward) + '</b>'
+                + '<br/><b>Population: ' + (props.pop2017).toLocaleString() : '');
+        };
+        info.addTo(map);
+
+    </script>
+
+</body>
+
+</html>

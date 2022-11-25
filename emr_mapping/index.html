@@ -1,0 +1,196 @@
+<html>
+<head>
+
+	<title> emr mapping </title>
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css">
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.0/dist/MarkerCluster.css">
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.0/dist/MarkerCluster.Default.css">
+
+	<script type="text/javascript" src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+
+	<script type="text/javascript" src="https://unpkg.com/leaflet.markercluster@1.0.0/dist/leaflet.markercluster.js"></script>
+
+	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="leaflet-heat.js"></script>
+	<script type="text/javascript" src="leaflet.ajax.min.js"></script>
+	<script type="text/javascript" src="emr2.js"></script><!-- created from python script-->
+
+	<script type="text/javascript" src="county.geojson"></script>
+	<script type="text/javascript" src="emr.geojson"></script>
+	<style type="text/css">
+		#map{height: 100%} /*#map{height: 550px; width:500px;} */
+		.info {
+			padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8);box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px;
+		}
+		.info h4 {
+			margin: 0 0 5px; color: #777;
+		}
+		.legend {
+			line-height: 18px;color: #555;
+		}
+		.legend i {
+			width: 18px; height: 18px; float: right;margin-left: 8px;opacity:.7;
+		}
+
+	</style>
+
+</head>
+<body>
+	<h2> Electronic Medical Registry Mapping </h2>
+	<div id="map"></div>
+	<script type="text/javascript">
+		
+		// plot the emr centers as a cluster of points: great for faster loading
+		var cluster = L.markerClusterGroup();
+
+		cluster.addLayer(L.geoJson(emr, {pointToLayer: function(feature, latlng){
+			var marker = L.marker(latlng, {icon: L.icon({iconUrl:'hospital.png', iconSize:[14, 14]})}); marker.bindPopup("<b> Partner: </b>"+feature.properties.partner+ "<br/><b>Facility Name: </b>"+ feature.properties.facility_n + "<br><b> Status: </b>"+feature.properties.status+'<br><b>'+feature.properties.status+' Clients: </b>'+ (feature.properties.active_cli).toLocaleString()); return marker;
+		}}));
+		// adding the cluster to layergroup
+		var polls = L.layerGroup([cluster]);
+
+		// creating a heatmap and adding it to the layergroup
+		var heat = L.heatLayer(emr2, {radius:18, blur:25, maxZoom:11});
+		var heatLayer = L.layerGroup([heat]);
+
+	  	// size the points, instead of hardcoding, use pysal package in future
+	  	function getSize(s){
+	  		if (s > 5706){
+	  			return 15;
+	  		}else if (s > 2456){
+	  			return 10;
+	  		}else if (s > 843){
+	  			return 5;
+	  		}else {
+	  			return 2
+	  		}
+	  	}
+	  	// color the points - numeric based
+	    function getColors(p){
+	    	return  p > 5706 ? '#a63603':
+	    	    	p > 2456 ? '#f16913':
+	    	    	p > 843  ? '#fdae6b':
+	    		               '#fdd0a2';
+	    }
+	    // color the points - text based
+	    function getColorz(p){
+	    	return p === 'Active' ? '#329d2b'://green
+	    		   p === 'Inactive'? '#e31a1c': //red
+	    		   p === 'Partially active'? '#85df16': //lightgreen
+	    		   							'gray';
+	    }
+	    // graduated symbols		
+		var pollgrad = L.layerGroup([L.geoJson(emr, {
+			pointToLayer: function(feature, latlng){
+				return new L.CircleMarker(latlng, {
+					radius: getSize(feature.properties.active_cli), 
+					fillOpacity:1, 
+					color: getColorz(feature.properties.status)
+					//color:getColors(feature.properties.active_cli)
+				});
+	  	}, onEachFeature: function(feature, layer){
+	  		layer.bindPopup("<b> Facility Name: </b>"+feature.properties.facility_n+"<br/><b>"+feature.properties.status+" Clients: </b>"+(feature.properties.active_cli).toLocaleString())
+	  	}
+	  })]);
+
+	    // Making a Choropleth map, here define the class colors based on counts of emr sites
+	    function getColor(p){ //greys: [#636363,#969696,#cccccc,#f7f7f7], browns: [#d94801,#fd8d3c,#fdd0a2,#fee6ce]
+	    	return  p > 26 ? '#d94801'://'#636363'
+	    	    	p > 16 ? '#fd8d3c'://'#969696'
+	    	    	p > 7  ? '#fdd0a2'://'#cccccc'
+	    		             '#fee6ce';//'#f7f7f7'
+	    }
+	    // define the styling
+	    function style(feature){
+	    	return {
+	    		fillColor: getColor(feature.properties.PNTCNT),
+	    		weight:2, opacity:1, color: 'white', dashArray:'5',
+	    		fillOpacity:.9
+	    	};
+	    }
+	    // make wards highlighted visually, define event listener
+	    function highlightFeature(e) {
+	    	var layer = e.target;
+	    	layer.setStyle({
+	    		weight:5, color:'orange', dashArray:'', fillOpacity:.7
+	    	});//not all browsers support bring to front
+	    	if (!L.Browser.ie && !L.Browser.opera & !L.Browser.edge){
+	    		layer.bringToFront();
+	    	}
+	    	info.update(layer.feature.properties);
+	    }
+	    // define what happens on mouse out
+	    function resetHighlight(e) {
+	    	wardx.resetStyle(e.target);
+	    	info.update();
+	    }
+	    // zoom to feature on click, define a click listener
+	    function zoomToFeature(e) {
+	    	map.fitBounds(e.target.getBounds());
+	    }
+	    // now add the listerners (click, hover) to our ward feature
+	    function onEachFeature (feature, layer) {
+	    	layer.on({
+	    		mouseover: highlightFeature,
+	    		mouseout: resetHighlight,
+	    		click: zoomToFeature
+	    	});
+	    }
+	    // plot the wards files based on our styling
+	    var wardx = L.geoJson(county, {
+	    	style: style, onEachFeature: onEachFeature
+	    });
+		// add the wards to layer	    
+		var ward = L.layerGroup([wardx]);
+
+		var tiles = L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg',
+		{
+			maxZoom:20, minZoom:5, attribution:'@bmitto &copy; <a href="http://thepalladiumgroup.com/">Palladium</a>'
+		});
+		// define a map container
+		var map = L.map('map',{center:[-0.18, 37.9], zoom:5, layers:[tiles, polls, ward]}); //omitting pollgrad means it wont be automatically checked upon loading
+		map.fitBounds(wardx.getBounds());
+		// define layers and add them to layer control
+		var baseMap = {"Streets": tiles};
+		var overLays = {"EMR (Clustered)": polls, "EMR (Proportional)": pollgrad, "EMR (Heatmap)":heatLayer, "County": ward};
+	    L.control.layers(baseMap, overLays).addTo(map);
+
+	    // style the map to return properties of highlighted feature
+	    var info = L.control();
+	    info.onAdd = function (map) {
+	    	this._div = L.DomUtil.create('div', 'info');
+	    	this.update();
+	    	return this._div;
+	    };
+	    // pass feature property
+	    info.update = function(props){
+	    	this._div.innerHTML = '<h4> EMR sites per County</h4>'+ (props ? '<b>' + props.county +'</b><br />' + '<b>'+(props.PNTCNT).toLocaleString()+'</b>':'Hover over a County');
+	    };
+	    info.addTo(map); 
+	    // addig legend to map (county)
+	    var legend = L.control({position: 'bottomleft'});
+	    legend.onAdd = function (map) {
+	    	var div = L.DomUtil.create('div', 'info legend'),
+	    	grades = [0,8,17,27], labels = [];
+	    	for (var i=0; i < grades.length; i++){
+	    		div.innerHTML += '<i style="background:'+getColor(grades[i]+1)+'"></i>'+grades[i]+(grades[i+1]?'&ndash;'+'<'+grades[i+1]+'<br>':'-58');
+	    	}
+	    	return div;
+	    };	   
+		legend.addTo(map);
+
+		// addig legend to map (emr sites)
+	    var legend2 = L.control({position: 'bottomright'});
+	    legend2.onAdd = function (map) {
+	    	var div = L.DomUtil.create('div', 'info legend');
+	    	categories = ['Active', 'Inactive', 'Partially active', 'No data'];
+	    	for (var i=0; i < categories.length; i++){
+	    		div.innerHTML += '<i style="background:'+getColorz(categories[i])+'"></i>'+(categories[i] ? categories[i] + '<br>': '+');//try adding class="circle" btw i and style
+	    	}
+	    	return div;
+	    };	   
+		legend2.addTo(map);	
+		
+	</script>
+</body>
+</html>	

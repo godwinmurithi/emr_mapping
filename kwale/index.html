@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="data/Ward_0.js"></script>
+        <script src="data/HIVPositivityFacility_1.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-4.70755379463,38.1905718971],[-3.53893687962,39.9181882404]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+        var bounds_group = new L.featureGroup([]);
+        var basemap0 = L.tileLayer('http://a.tile.stamen.com/terrain/{z}/{x}/{y}.png', {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>,<a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;Map data: &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 28
+        });
+        basemap0.addTo(map);
+        function setBounds() {
+        }
+        function pop_Ward_0(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Population</th>\
+                        <td>' + (feature.properties['Pop2009'] !== null ? Autolinker.link(String(feature.properties['Pop2009'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Sub County</th>\
+                        <td>' + (feature.properties['sub_county'] !== null ? Autolinker.link(String(feature.properties['sub_county'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Ward</th>\
+                        <td>' + (feature.properties['Ward'] !== null ? Autolinker.link(String(feature.properties['Ward'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Ward_0_0() {
+            return {
+                pane: 'pane_Ward_0',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '1,5',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(205,210,214,0.0)',
+            }
+        }
+        map.createPane('pane_Ward_0');
+        map.getPane('pane_Ward_0').style.zIndex = 400;
+        map.getPane('pane_Ward_0').style['mix-blend-mode'] = 'normal';
+        var layer_Ward_0 = new L.geoJson(json_Ward_0, {
+            attribution: '<a href=""></a>',
+            pane: 'pane_Ward_0',
+            onEachFeature: pop_Ward_0,
+            style: style_Ward_0_0,
+        });
+        bounds_group.addLayer(layer_Ward_0);
+        map.addLayer(layer_Ward_0);
+        function pop_HIVPositivityFacility_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Facility</th>\
+                        <td>' + (feature.properties['facility'] !== null ? Autolinker.link(String(feature.properties['facility'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type</th>\
+                        <td>' + (feature.properties['Type'] !== null ? Autolinker.link(String(feature.properties['Type'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Ownership</th>\
+                        <td>' + (feature.properties['Ownership'] !== null ? Autolinker.link(String(feature.properties['Ownership'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Positivity</th>\
+                        <td>' + (feature.properties['HIVPercPos'] !== null ? Autolinker.link(String(feature.properties['HIVPercPos'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_HIVPositivityFacility_1_0(feature) {
+            if (feature.properties['HIVPercPos'] >= 0.000000 && feature.properties['HIVPercPos'] <= 2.000000 ) {
+                return {
+                pane: 'pane_HIVPositivityFacility_1',
+                radius: 10.0,
+                opacity: 1,
+                color: 'rgba(26,150,65,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+            }
+            }
+            if (feature.properties['HIVPercPos'] >= 2.000000 && feature.properties['HIVPercPos'] <= 4.500000 ) {
+                return {
+                pane: 'pane_HIVPositivityFacility_1',
+                radius: 13.33334,
+                opacity: 1,
+                color: 'rgba(196,230,135,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(196,230,135,1.0)',
+            }
+            }
+            if (feature.properties['HIVPercPos'] >= 4.500000 && feature.properties['HIVPercPos'] <= 9.000000 ) {
+                return {
+                pane: 'pane_HIVPositivityFacility_1',
+                radius: 16.66666,
+                opacity: 1,
+                color: 'rgba(254,201,129,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,201,129,1.0)',
+            }
+            }
+            if (feature.properties['HIVPercPos'] >= 9.000000 && feature.properties['HIVPercPos'] <= 16.700000 ) {
+                return {
+                pane: 'pane_HIVPositivityFacility_1',
+                radius: 20.0,
+                opacity: 1,
+                color: 'rgba(110,138,26,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+            }
+            }
+        }
+        map.createPane('pane_HIVPositivityFacility_1');
+        map.getPane('pane_HIVPositivityFacility_1').style.zIndex = 401;
+        map.getPane('pane_HIVPositivityFacility_1').style['mix-blend-mode'] = 'normal';
+        var layer_HIVPositivityFacility_1 = new L.geoJson(json_HIVPositivityFacility_1, {
+            attribution: '<a href=""></a>',
+            pane: 'pane_HIVPositivityFacility_1',
+            onEachFeature: pop_HIVPositivityFacility_1,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_HIVPositivityFacility_1_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_HIVPositivityFacility_1);
+        map.addLayer(layer_HIVPositivityFacility_1);
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'% HIV Positivity (Facility)<br /><table><tr><td style="text-align: center;"><img src="legend/HIVPositivityFacility_1_00200.png" /></td><td> 0.0% - 2.0% </td></tr><tr><td style="text-align: center;"><img src="legend/HIVPositivityFacility_1_21451.png" /></td><td> 2.1% - 4.5% </td></tr><tr><td style="text-align: center;"><img src="legend/HIVPositivityFacility_1_46902.png" /></td><td> 4.6% - 9.0% </td></tr><tr><td style="text-align: center;"><img src="legend/HIVPositivityFacility_1_903.png" /></td><td>> 9.0%</td></tr></table>': layer_HIVPositivityFacility_1,'<img src="legend/Ward_0.png" /> Ward': layer_Ward_0,},{collapsed:false}).addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>

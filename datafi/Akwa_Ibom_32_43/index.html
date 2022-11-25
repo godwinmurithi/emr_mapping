@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-family: Arial;
+}
+
+/* The grid: Four equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 16%;
+  padding: 10px;
+}
+
+/* Style the images inside the grid */
+.column img {
+  opacity: 0.8; 
+  cursor: pointer; 
+}
+
+.column img:hover {
+  opacity: 1;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* The expanding image container */
+.container {
+  position: relative;
+  display: none;
+}
+
+/* Expanding image text */
+#imgtext {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  color: white;
+  font-size: 20px;
+}
+
+/* Closable button inside the expanded image */
+.closebtn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  color: white;
+  font-size: 35px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div style="text-align:center">
+  <h2> Akwa Ibom Week 32 - 43</h2>
+  <p>Click image to expand:</p>
+</div>
+
+<!-- The four columns -->
+<div class="row">
+  <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - UNDX.png" alt="UNDX" style="width:100%" onclick="myFunction(this);">
+  </div>
+  <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - HTS_TST_POS.png" alt="HTS_TST_POS" style="width:100%" onclick="myFunction(this);">
+  </div>
+  <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - TX_CURR.png" alt="TX_CURR" style="width:100%" onclick="myFunction(this);">
+  </div>
+  <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - VL_Coverage.png" alt="VL_Coverage" style="width:100%" onclick="myFunction(this);">
+  </div>
+    <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - VL_Suppression.png" alt="VL_Suppression" style="width:100%" onclick="myFunction(this);">
+  </div>
+      <div class="column">
+    <img src="../Week 32 - 43/Akwa Ibom - Yield vs Prevalence.png" alt="Akwa Ibom - Yield vs Prevalence" style="width:100%" onclick="myFunction(this);">
+  </div>
+</div>
+
+<div class="container">
+  <span onclick="this.parentElement.style.display='none'" class="closebtn">&times;</span>
+  <img id="expandedImg" style="width:100%">
+  <div id="imgtext"></div>
+</div>
+
+<script>
+function myFunction(imgs) {
+  var expandImg = document.getElementById("expandedImg");
+  var imgText = document.getElementById("imgtext");
+  expandImg.src = imgs.src;
+  imgText.innerHTML = imgs.alt;
+  expandImg.parentElement.style.display = "block";
+}
+</script>
+
+</body>
+</html>
