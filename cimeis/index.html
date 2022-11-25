@@ -1,0 +1,522 @@
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Baringo CIMEIS - GIS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- include leaflet CSS file -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css">
+    <!-- include leaflet js file-->
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <!-- include ward file -->
+    <script src="data/baringo_ward.geojson"></script>
+    <script src="data/real_data.json"></script>
+    <!--<script src="http://icis.co.ke/api/project/all"></script>-->
+
+    <script type="text/javascript">
+
+        function loadRequiredData(){
+            //Load Sub Counties to the Select Boxes
+            var x = document.getElementById("sub-county-select");
+            var subcounties = getSubCounties(ward.features);
+            console.log('SubCounty List: '+subcounties);
+            for(var sub = 0; sub < subcounties.length; sub++){
+                console.log('SubCounty: '+subcounties[sub]);
+                var option = document.createElement("option");
+                //option.appendChild( document.createTextNode('New Option Text') );
+                option.text = subcounties[sub];
+                x.appendChild(option);
+            }
+            
+        }
+        window.onload=loadRequiredData;
+
+        function getSubCounties(obj) {
+            var objects = [];   
+
+            for (var i in obj) {
+                objects.push(obj[i].properties.subcounty);
+            }
+            return [... new Set(objects)] ;
+        }
+    </script>
+
+    <style>
+        *{box-sizing: border-box;}
+        header {
+            background-color:dimgray;
+            padding: 0px;
+            text-align: center;
+            font-size: 30px;
+            color: white;
+        }
+        /* container fro flex box */
+        section {
+            display: -webkit-flex; display: flex;
+        }
+        /* style the navigation menu */
+        nav {-webkit-flex: 1; -ms-flex:1; flex:1; background: #ccc; padding: 20px;}
+        /* style the list inside the menu 
+        nav ul {list-style-type: none; padding: 0;}*/
+        /* style the content */
+        article {-webkit-flex: 3; -ms-flex:3; flex:3; padding: 10px;}
+        /* clear the floats after the columns 
+        section:after {content: ""; display: table; clear: both;}*/
+        /* style the footer */
+        footer {background-color:dimgray; padding: 5px; text-align: center; color: white; }
+        hr1 {
+            overflow: visible; /* For IE */
+            height: 30px;
+            border-style: solid;
+            border-color: black;
+            border-width: 1px 0 0 0;
+            border-radius: 20px;
+        }
+        hr1:before { /* Not really supposed to work, but does */
+            display: block;
+            content: "";
+            height: 30px;
+            margin-top: -31px;
+            border-style: solid;
+            border-color: black;
+            border-width: 0 0 1px 0;
+            border-radius: 20px;
+        }
+        label {
+            color:dimgray;
+            font-size: 10pt;
+        }
+        input[type=checkbox]:hover {
+            box-shadow: 0px 0px 12px #1300ff;
+        }
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <nav>
+            <hr>
+            <h2> Sectors</h2>
+            <form action="/action_page.php">
+                <input type="checkbox" id="HEALTH" value="HEALTH" > Health<br>
+                <input type="checkbox" id="WATER, ENVIRONMENT AND NATURAL RESOURCES" 
+                        value="WATER, ENVIRONMENT AND NATURAL RESOURCES" disabled="true"> <label for="checkbox">
+                                Water Environment & Natural Resources
+                        </label><br>
+                <input type="checkbox" id="School" value="School" disabled> <label for="checkbox">
+                        Education
+                </label><br>
+                <input type="checkbox" id="social-protecttion" value="social-protection" disabled> <label>
+                        Social Protection Culture & Recreation
+                </label><br>
+                <input type="checkbox" id="agriculture" value="agriculture" disabled> <label for="checkbox">
+                        Agruculture, Rural & Urban Development
+                </label><br>
+                <input type="checkbox" id="pagigr" value="pagigr" disabled> <label>
+                        Public Administration & Governance
+                </label><br>
+                <input type="checkbox" id="energy" value="energy" disabled> <label for="checkbox">
+                        Energy, Infrastructure & ICT
+                </label><br>
+                <input type="checkbox" id="economics" value="economics" disabled/> <label for="checkbox">
+                        General Economics & Commercial Affair
+                </label><br>
+            </form>
+
+            <hr>
+            <h2> Project Status</h2>
+            <form action="/action_page.php">
+                <input type="checkbox" id="Completed" value="Completed" onclick="loadProjectStatus(value);"> Complete<br>
+                <input type="checkbox" id="Stalled" value="Stalled" onclick="loadProjectStatus(value);"> Stalled<br>
+                <input type="checkbox" id="Ongoing" value="Ongoing" onclick="loadProjectStatus(value);"> Ongoing<br>
+                <input type="checkbox" id="Other" value="Other" onclick="loadProjectStatus(value);"> Other<br><br>
+            </form>
+            
+            
+            <hr>
+            <h2> Sub County</h2>
+            <select id="sub-county-select" name="sub-county-select" onchange="changeSubCounty();">
+                
+                <option value="">Select Sub County</option>
+            </select>
+            <hr>
+
+            <h2> Ward </h2>
+
+            <select id="ward-select" name="ward-select" onchange="getWardImage(value);">
+            </select>
+            
+        </nav>
+        <article>
+                <div id='mapid' style="height: 650px; width: 100%; padding: 20px"></div>
+                <script>
+
+                    //Global Variables
+                    var healthSectorName = "HEALTH";
+                    var waterSectorName = "WATER, ENVIRONMENT AND NATURAL RESOURCES";
+                    var educationSectorName = "EDUCATION";
+                    // on mouse hover over ward
+                    function highlightFeature(e) {
+                        var layer = e.target;
+                        layer.setStyle({
+                            weight: 5, color: 'maroon', dashArray:'', fillOpacity:.7
+                        });
+                        if (!L.Browser.ie && !L.Browser.edge && !L.Browser.opera) {
+                            layer.bringToFront();
+                        }
+                        info.update(layer.feature.properties)
+                    }
+                    // zoom to feature on click
+                    function zoomToFeature(e) {
+                        map.fitBounds(e.target.getBounds());
+                    }
+
+                    function changeSubCounty(){
+                        var selectBox = document.getElementById("sub-county-select");
+                        var selectedSubCounty = selectBox.options[selectBox.selectedIndex].value;
+                        console.log('Selected SubCounty: '+selectedSubCounty); 
+
+                        getSubCountyImage(selectedSubCounty);
+
+                        //Get Wards
+                        var wards = getObjects(ward.features,'County',selectedSubCounty);
+
+                        //Remove wards from select list
+                        var wardelement = document.getElementById("ward-select");
+                        var length = wardelement.options.length;
+                        console.log('Items in List: '+length);
+                        for (var i = length - 1 ; i >= 0 ; i--) {
+                            //wardelement.options[i] = null;
+                            wardelement.remove(i);
+                        }
+
+                        //Add wards to select list for the selected county
+
+                        var option1 = document.createElement("option");
+                        option1.text = "Select Ward";
+                        wardelement.appendChild(option1); //Add the first option
+                        for(var w = 0; w < wards.length; w++){
+                            console.log('Ward Name: '+wards[w]);
+                            
+                            var option = document.createElement("option");
+                            option.text = wards[w];
+                            wardelement.appendChild(option);
+                        }
+                        
+                    }
+
+                    // define the basemaps
+                    var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy Open Street Map Contributors', 
+                        maxZoom: 18,
+                        minZoom: 5
+                    }),
+                    MBox = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYm1pdHRvIiwiYSI6ImNqZHgzdWFtZTBmejUzM3AwaG1rZjRyMTMifQ.rwT5EXzQkDsAuX0_1EWYvg', {
+                        id: 'mapbox.light',
+                        attribution: '&copy; <a href="http://icis.co.ke">ICIS</a>'
+                    }),
+                    CartoDB = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="http://icis.co.ke">ICIS</a>',
+                        subdomains: 'abcd',
+                        maxZoom: 18,
+                        minZoom: 5
+                    }), 
+                    stamen = L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg', {
+                        attribution: '&copy; Stamen',
+                        maxZoom: 18,
+                        minZoom: 5
+                    });
+                    var basemaps = {"Light Gray": MBox, "Dark":CartoDB, "Stamen": stamen, "Open Street Map": osm}
+                    // initialize the map instance, set the view and zoom levels
+                    var map = L.map("mapid", {center: [0.718124, 35.895375], zoom:9, layers:[osm]});
+                    // load wards by default
+                    var subcounty = L.geoJson(ward, {
+                            // style the ward color and line appearance
+                            style: {"color":"green", "weight": 2, "opacity":1, "dashArray":'4', "fillOpacity":0, "fillColor":'white'},
+                            // set popup to ward name
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup (feature.properties.ward),
+                                layer.on({
+                                    mouseover: highlightFeature,
+                                    mouseout: function (e) {
+                                        subcounty.resetStyle(e.target);
+                                        info.update();
+                                    },
+                                    click: zoomToFeature
+                                });
+                            }
+                        }).addTo(map);
+
+                    L.control.layers(basemaps, {"All Wards": subcounty}).addTo(map);
+
+                    var markersLayer = new L.LayerGroup();
+                    //These are the LayerGroups for HealthData for the 4 project statuses
+                    var CompletedHealthMarkersLayer = new L.LayerGroup();
+                    var OngoingHealthMarkersLayer = new L.LayerGroup();
+                    var StalledHealthMarkersLayer = new L.LayerGroup();
+                    var OtherHealthMarkersLayer = new L.LayerGroup();
+
+                    // add the points geojson data - define the markers for each sector
+                    function getIcon (icons) {
+                        return icons == healthSectorName ? 'icons/health.png':
+                               icons == educationSectorName ? 'icons/school.png':
+                               'icons/water.png';
+                    }
+                    //Not in use due to changes 
+                    //Worked when one selected health, it would load the selected data
+                    /*
+                    function loadSectorData(sectorName){
+                        console.log('Selected Sector: '+sectorName);
+                        if(document.getElementById(sectorName).checked){
+                            console.log('Selected Sector: '+sectorName);
+                            for(var x = 0; x < realdata.info.length; x++){
+                                if(realdata.info[x].Lat != null && realdata.info[x].SectorName === sectorName){
+                                    console.log("Data:"+realdata.info[x].SectorName+"|"+realdata.info[x].ProgrammeName);
+                                    //console.log("Data:"+x.Lat);
+                                    var marker = L.marker([realdata.info[x].Lat, realdata.info[x].Long],
+                                                        {icon: L.icon({iconUrl: getIcon(realdata.info[x].SectorName), 
+                                                                       iconSize: [15, 15]}) });
+
+                                    marker.bindPopup("<b> Name:</b>"+realdata.info[x].ProjectName+"<br/>\
+                                                    <b> Program:</b>"+realdata.info[x].ProgrammeName+"<br/>\
+                                                    <b> Projects Status:</b>"+realdata.info[x].Status+"<br/>\
+                                                    <b> Remarks:</b>"+realdata.info[x].Remarks);
+                                                    //return marker;
+                                    //marker.addTo(map);
+                                    markersLayer.addLayer(marker);
+
+                                }
+                                
+                            }
+                            markersLayer.addTo(map);
+       
+                        }
+                    }*/
+
+
+                    function loadProjectStatus(projectStatus){
+                        console.log('Selected Project Status: '+projectStatus);
+
+                        if(document.getElementById(projectStatus).checked){
+                            if (document.getElementById(healthSectorName).checked){
+                                var healthData = filterData(projectStatus, healthSectorName,"add");
+                            }
+
+                            if (document.getElementById(educationSectorName).checked){
+                                var schoolData = filterData(projectStatus, educationSectorName,"add");
+                            }
+
+                            if (document.getElementById(waterSectorName).checked){
+                                var waterData = filterData(projectStatus, waterSectorName,"add");
+                            }
+                        }else{
+                            //If the checkbox is uncheked, remove the LayerGroup
+                            if (document.getElementById(healthSectorName).checked){
+                                if(projectStatus === "Completed"){
+                                    map.removeLayer(CompletedHealthMarkersLayer);
+                                }else if(projectStatus === "Stalled"){
+                                    map.removeLayer(StalledHealthMarkersLayer);
+                                }else if(projectStatus === "Ongoing"){
+                                    map.removeLayer(OngoingHealthMarkersLayer);
+                                }else{
+                                    map.removeLayer(OtherHealthMarkersLayer);
+                                }
+                            }
+
+                            if (document.getElementById(educationSectorName).checked){
+                            }
+
+                            if (document.getElementById(waterSectorName).checked){
+                            }
+                        }
+                    }
+
+                    function filterData(projectStatus, sectorName, action){
+                        console.log("FilterData:"+projectStatus +", SectorName:"+sectorName +", Action: "+action)
+
+                        //Filter Data based on sectorName and ProjectStatus
+                        for(var x = 0; x < realdata.info.length; x++){
+                                if(realdata.info[x].Lat != null && 
+                                    realdata.info[x].SectorName === sectorName &&
+                                    realdata.info[x].Status === projectStatus){
+                                    console.log("ProjectStatusData:"+realdata.info[x].SectorName+"|"+realdata.info[x].Status);
+                                    //console.log("Data:"+x.Lat);
+                                    var marker = L.marker([realdata.info[x].Lat, realdata.info[x].Long],
+                                                        {icon: L.icon({iconUrl: getIcon(realdata.info[x].SectorName), 
+                                                                       iconSize: [15, 15]}) });
+
+                                    marker.bindPopup("<b> Name:</b>"+realdata.info[x].ProjectName+"<br/>\
+                                                    <b> Program:</b>"+realdata.info[x].ProgrammeName+"<br/>\
+                                                    <b> Projects Status:</b>"+realdata.info[x].Status+"<br/>\
+                                                    <b> Remarks:</b>"+realdata.info[x].Remarks+"<br/>\
+                                                    <b> More info:</b> <a href='http://icis.co.ke/#/indicator' target='_blank'> Click here </a> " + "<br/>\
+                                                    <b> ProjectID:</b>" +realdata.info[x].ProjectId);
+
+                                    //Add Marker to the LayerGroup
+                                    if(action === "add"){
+                                        
+                                        if(sectorName === healthSectorName){
+                                            console.log("Adding to respective LayerGroup")
+                                            if(projectStatus === "Completed"){
+                                                CompletedHealthMarkersLayer.addLayer(marker);
+                                            }else if(projectStatus === "Stalled"){
+                                                StalledHealthMarkersLayer.addLayer(marker);
+                                            }else if(projectStatus === "Ongoing"){
+                                                OngoingHealthMarkersLayer.addLayer(marker);
+                                            }else{
+                                                OtherHealthMarkersLayer.addLayer(marker);
+                                            }
+
+                                        }else if(sectorName === educationSectorName){
+
+                                        }else if(sectorName === waterSectorName){
+
+                                        }
+
+                                    }
+                                }
+                            }
+                        //Add the Pupulated LayerGroup to the map
+                        if(projectStatus == "Completed" && sectorName === healthSectorName){
+                            map.addLayer(CompletedHealthMarkersLayer);
+                        }else if(projectStatus == "Stalled" && sectorName === healthSectorName){
+                            map.addLayer(StalledHealthMarkersLayer);
+                        }else if(projectStatus == "Ongoing" && sectorName === healthSectorName){
+                            map.addLayer(OngoingHealthMarkersLayer);
+                        }else {
+                            map.addLayer(OtherHealthMarkersLayer);
+                        }
+
+
+                    }
+
+                    // add the ward geojson file
+                    function getSubCountyImage(subCountyName){
+
+                        
+                        
+                        var subcounty = L.geoJson(ward, {
+                            // style the ward color and line appearance
+                            style: {"color":"#ff7800", "weight": 2, "opacity":1, "dashArray":'4', "fillOpacity":0, "fillColor":'white'},
+                            // set popup to ward name
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup (feature.properties.ward),
+                                layer.on({
+                                    mouseover: highlightFeature,
+                                    mouseout: function (e) {
+                                        subcounty.resetStyle(e.target);
+                                        info.update();
+                                    },
+                                    click: zoomToFeature
+                                });
+                            }, filter: function(feature) {
+                                if(feature.properties.subcounty === subCountyName) return true
+                            }
+                        });//.addTo(map);
+
+                        if (this.previoussubcounty != null){
+                            map.removeLayer(this.previoussubcounty);
+                            //map.removeLayer(this.previousward);
+                        }
+
+                        if (this.previousward != null){
+                            map.removeLayer(this.previousward);
+                        }
+
+                        this.previoussubcounty = subcounty;
+
+                        map.addLayer(subcounty);
+
+                        map.fitBounds(subcounty.getBounds());
+                        //map.removeLayer(wards);
+                    }
+
+                    function getWardImage(wardName){
+                        
+                        var wards = L.geoJson(ward, {
+                            // style the ward color and line appearance
+                            style: {"color":"#ff7800", "weight": 2, "opacity":1, "dashArray":'4', "fillOpacity":0.7, "fillColor":'white'},
+                            // set popup to ward name
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup (feature.properties.ward)
+                            }, filter: function(feature) {
+                                if(feature.properties.ward === wardName) return true
+                            }
+                        });//.addTo(map);
+
+
+                        if (this.previoussubcounty != null){
+                            map.removeLayer(this.previoussubcounty);
+                        }
+
+                        if (this.previousward != null){
+                            map.removeLayer(this.previousward);
+                        }
+
+                        this.previousward = wards;
+                        map.addLayer(wards);
+                        map.fitBounds(wards.getBounds());
+                        
+                    }
+
+                    function getObjects(obj,key,value) {
+                        var objects = [];
+                        for (var i in obj) {
+                            //console.log('Line:'+ JSON.stringify(obj[i]));
+
+                            if (obj[i].properties.subcounty == value){
+                                objects.push(obj[i].properties.ward);
+                            }
+                        }
+                        return objects;
+                    }
+
+                    //Get list of subcounties from the ward json file
+                    function getSubCounties(obj) {
+                        var objects = [];   
+                        for (var i in obj) {
+                            //console.log('Line:'+ JSON.stringify(obj[i]));
+                            objects.push(obj[i].properties.subcounty);
+                        }
+                        return [... new Set(objects)] ;
+                    }
+
+                    var info = L.control({position: 'topleft'});
+
+                    info.onAdd = function(map) {
+                        this._div = L.DomUtil.create('div', 'info');
+                        this.update();
+                        return this._div;
+                    }
+                    info.update = function(props) {
+                        this._div.innerHTML = '<h4> Administrative Units</h4>' + 
+                        (props?'<b>' + props.subcounty + '</b>' + 
+                        '<br>' + props.ward:'Select sub county <br> then Hover over ward')
+                    }
+                    info.addTo(map);
+
+
+                </script>
+        </article>
+    </section>
+    <footer>
+        <p>&copy; CIMEIS-Baringo</p>
+    </footer>
+
+    
+</body>
+</html>

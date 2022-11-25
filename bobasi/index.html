@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Immunizing Facilities in Bobasi Sub County</title>
+    <meta charset="utf-8" , name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css">
+    <script type="text/javascript" src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+
+    <script type="text/javascript"
+        src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster-src.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <script type="text/javascript" src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <style type="text/css">
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+        .legend {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: #3f3250;
+            color: #c0b3a0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            width: 145 px;
+            border: 2px solid #E14658;
+        }
+
+        .legend i {
+            margin-left: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <!--<script type="text/javascript" src = "data/wards.geojson"></script>-->
+    <script type="text/javascript" src="data/bobasi_ward.geojson"></script>
+    <script type="text/javascript" src="data/bobasi_facility.geojson"></script>
+    <script type="text/javascript">
+        var map = L.map('map', { scrollWheelZoom: true }).setView([-0.8231, 34.7977], 11);
+        var OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 15, minZoom: 8,
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>'
+        });
+
+        var MBox = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYm1pdHRvIiwiYSI6ImNqZHgzdWFtZTBmejUzM3AwaG1rZjRyMTMifQ.rwT5EXzQkDsAuX0_1EWYvg', {
+            id: 'mapbox.light',
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>'
+        });
+        var MSat = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYm1pdHRvIiwiYSI6ImNqZHgzdWFtZTBmejUzM3AwaG1rZjRyMTMifQ.rwT5EXzQkDsAuX0_1EWYvg', {
+            id: 'mapbox.satellite',
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>'
+        }).addTo(map);
+
+        var CartoDB = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://mapnovate.com">@bmitto</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        });
+
+        function highlightFeature(e) {
+            var layer = e.target;
+            layer.setStyle({
+                weight: 5, color: 'maroon', dashArray: '', fillOpacity: .5
+            });
+            if (!L.Browser.ie && !L.Browser.opera & !L.Browser.edge) {
+                layer.bringToFront();
+            }
+            info.update(layer.feature.properties);
+        }
+
+        function getIcon(owner) {
+            return owner == 'GOK' ? 'data/facility.png' :
+                owner == 'PRIVATE' ? 'data/private.png' :
+                    'data/fbo.png';
+        }
+
+        var markers = L.markerClusterGroup();
+
+        var HF = L.geoJson(facility, {
+            pointToLayer: function (feature, latlng) {
+                var marker = L.marker(latlng, { icon: L.icon({ iconUrl: getIcon(feature.properties.owner), iconSize: [15, 15] }) });
+                marker.bindPopup("<b> Facility: </b>" + feature.properties.facility + "<br/><b> Immunizing?: </b>" +
+                    feature.properties.immunizing + "<br/><b> Ownership: </b>" + feature.properties.owner + "<br/><b> Ward: </b>" +
+                    (feature.properties.Ward));
+                return marker;
+            }
+        }).addTo(map);
+
+        markers.addLayer(HF);
+
+        // create heat map of points: https://github.com/Leaflet/Leaflet.heat/issues/12
+        var geojson2heat = function (geojson, intensity) {
+            return geojson.features.map(function (feature) {
+                return [parseFloat(feature.geometry.coordinates[1]), parseFloat(feature.geometry.coordinates[0]), intensity];
+            });
+        }
+        var geoData = geojson2heat(facility, 20); // min 0 - max infinity, but try <=30
+
+        var heat = new L.heatLayer(geoData, { radius: 25, blur: 15, maxZoom: 17 }); //range [10, 50]
+
+
+        /* will explore on how to make icons change based on zoom level
+        map.on('zoomend', function (){
+            var currZoom = map.getZoom();
+            var x = 10;
+            var y = 10;
+            var LeafIcon = L.icon.extend({
+                options: {
+                    iconSize: [x, y]
+                }
+            });
+            HF.setIcon(LeafIcon);
+        });*/
+
+        var ward = L.geoJson(wards, {
+            style: function (feature) {
+                return { fillColor: 'grey', weight: 1, opacity: 1, color: 'white', dashArray: '5', fillOpacity: 0 }; //#00CD66, #CD2990
+            }, onEachFeature: function (feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: function (e) { ward.resetStyle(e.target); info.update(); },
+                    click: function (e) { map.fitBounds(e.target.getBounds()); }
+                });
+            }
+        }).addTo(map);
+
+
+
+        L.control.layers({ "Open Street Map": OSM, "Mapbox Satellite": MSat, "Mapbox Light": MBox, "Carto DB": CartoDB },
+            { "Facility": HF, "Clusters": markers, "Heatmap": heat, "Wards": ward }).addTo(map);
+
+        var info = L.control({ position: 'topleft' });
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div
+        };
+        info.update = function (props) {
+            this._div.innerHTML = '<h4> Administrative Units </h4>' + (props ? '<b>Sub County: ' +
+                (props.subcounty).toUpperCase() + '</b>' + '<br/><b>Ward: ' + (props.ward) + '</b>'
+                + '<br/><b>2009 Population: ' + (props.pop2009).toLocaleString() : '');
+        };
+        info.addTo(map);
+
+        var legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend'),
+                Ownership = ['GOK', 'FBO', 'PRIVATE']
+            //labels = ['GOK', 'FBO', 'Private']
+            for (var i = 0; i < Ownership.length; i++) {
+                div.innerHTML += '<img src=' + getIcon(Ownership[i]) + ' height=15 width=15>' +
+                    (Ownership[i] ? Ownership[i] + '<br>' : '+');
+            }
+            return div;
+        };
+        legend.addTo(map);
+
+    </script>
+
+</body>
+
+</html>
